@@ -13,7 +13,7 @@ export default function Home() {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const eventSource = new EventSource(`http://localhost:8000/api/notifications/stream?token=${token}`);
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/notifications/stream?token=${token}`);
 
     eventSource.onmessage = (event) => {
       try {
@@ -44,7 +44,7 @@ export default function Home() {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await axios.put(`http://localhost:8000/api/notifications/${id}/read`, {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setNotifications(prev => prev.map(n => 
@@ -57,7 +57,7 @@ export default function Home() {
 
   const handleSnooze = async (id) => {
     try {
-      await axios.put(`http://localhost:8000/api/notifications/${id}/snooze`, {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/${id}/snooze`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setNotifications(prev => prev.map(n => 

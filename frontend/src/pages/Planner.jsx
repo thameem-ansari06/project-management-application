@@ -55,9 +55,9 @@ export default function Planner() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      let url = `http://127.0.0.1:8000/api/tasks?workspace_id=${selectedWorkspace.id}`;
+      let url = `${import.meta.env.VITE_API_URL}/api/tasks?workspace_id=${selectedWorkspace.id}`;
       if (selectedProjectId) {
-        url = `http://127.0.0.1:8000/api/tasks?project_id=${selectedProjectId}`;
+        url = `${import.meta.env.VITE_API_URL}/api/tasks?project_id=${selectedProjectId}`;
       }
       const res = await axios.get(url);
       setTasks(res.data);

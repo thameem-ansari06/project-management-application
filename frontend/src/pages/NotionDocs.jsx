@@ -92,22 +92,22 @@ export default function NotionDocs() {
     const ext = (doc.file_name || '').split('.').pop().toLowerCase();
     
     if (['pdf'].includes(ext)) {
-      return <span className="text-xl shrink-0">📕</span>;
+      return <span className="text-xl shrink-0">ðŸ“•</span>;
     }
     if (['doc', 'docx'].includes(ext)) {
-      return <span className="text-xl shrink-0">📘</span>;
+      return <span className="text-xl shrink-0">ðŸ“˜</span>;
     }
     if (['xls', 'xlsx', 'csv'].includes(ext)) {
-      return <span className="text-xl shrink-0">🟢</span>;
+      return <span className="text-xl shrink-0">ðŸŸ¢</span>;
     }
     if (['ppt', 'pptx'].includes(ext)) {
-      return <span className="text-xl shrink-0">📙</span>;
+      return <span className="text-xl shrink-0">ðŸ“™</span>;
     }
     if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
       return <ImageIcon className="w-5 h-5 text-emerald-400 shrink-0" />;
     }
     if (['zip', 'rar', 'tar', 'gz'].includes(ext)) {
-      return <span className="text-xl shrink-0">📦</span>;
+      return <span className="text-xl shrink-0">ðŸ“¦</span>;
     }
     if (['html', 'css', 'js', 'json', 'py', 'go'].includes(ext)) {
       return <FileCode className="w-5 h-5 text-amber-400 shrink-0" />;
@@ -130,7 +130,7 @@ export default function NotionDocs() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/documents/upload?workspace_id=${selectedWorkspace.id}`, formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/documents/upload?workspace_id=${selectedWorkspace.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       await fetchDocuments(selectedWorkspace.id);
@@ -185,7 +185,7 @@ export default function NotionDocs() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#1b1c1e] p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm shrink-0">
         <div>
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-            📂 Documents & Files Manager
+            ðŸ“‚ Documents & Files Manager
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Store documents, notes, assets, and files for this workspace. Delete permissions are restricted to Managers.
@@ -272,11 +272,11 @@ export default function NotionDocs() {
                         </span>
                         {doc.file_size && (
                           <>
-                            <span>•</span>
+                            <span>â€¢</span>
                             <span>{formatFileSize(doc.file_size)}</span>
                           </>
                         )}
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>
                           {new Date(doc.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </span>

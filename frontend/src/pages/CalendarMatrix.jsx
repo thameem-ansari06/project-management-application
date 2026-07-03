@@ -38,7 +38,7 @@ export default function CalendarMatrix() {
     if (!selectedProjectId) return;
     setLoading(true);
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/tasks?project_id=${selectedProjectId}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tasks?project_id=${selectedProjectId}`);
       setTasks(res.data);
     } catch (err) {
       console.error('Error fetching tasks for calendar:', err);

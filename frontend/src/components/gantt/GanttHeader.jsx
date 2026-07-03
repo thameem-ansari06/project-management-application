@@ -24,7 +24,7 @@ export default function GanttHeader({
     try {
       setIsRemoving(true);
       const token = localStorage.getItem('token');
-      await axios.post(`http://127.0.0.1:8000/api/projects/${selectedSpace.id}/remove-json`, {}, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/projects/${selectedSpace.id}/remove-json`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       window.location.reload();
@@ -85,7 +85,7 @@ export function GanttControls({
     setIsExporting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/export-json`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/projects/${projectId}/export-json`, {
         responseType: 'blob',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -114,7 +114,7 @@ export function GanttControls({
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://127.0.0.1:8000/api/projects/${projectId}/import-json`, formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/projects/${projectId}/import-json`, formData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       window.location.reload();

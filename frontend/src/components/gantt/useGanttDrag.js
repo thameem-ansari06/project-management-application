@@ -66,9 +66,9 @@ export default function useGanttDrag({
     }
   };
 
-  // Move mode — fires from the bar body (not the edge handles)
+  // Move mode â€” fires from the bar body (not the edge handles)
   const handlePointerDown = (e, task) => {
-    // Tasks controlled by predecessor_id have server-managed dates — skip drag
+    // Tasks controlled by predecessor_id have server-managed dates â€” skip drag
     if (task.predecessor_id) return;
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -141,7 +141,7 @@ export default function useGanttDrag({
 
       try {
         const token = localStorage.getItem('token');
-        await axios.put(`http://127.0.0.1:8000/api/tasks/${task.id}`, { progress: newProg }, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${task.id}`, { progress: newProg }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } catch (err) {
@@ -207,7 +207,7 @@ export default function useGanttDrag({
         };
         if (patchMap[id].end_date !== undefined) payload.end_date = patchMap[id].end_date;
         if (patchMap[id].due_date !== undefined) payload.due_date = patchMap[id].due_date;
-        return axios.put(`http://127.0.0.1:8000/api/tasks/${id}`, payload, {
+        return axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
       });

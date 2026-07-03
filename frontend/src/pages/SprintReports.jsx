@@ -86,7 +86,7 @@ export default function SprintReports() {
       const fetchProjectTasks = async () => {
         setLoading(true);
         try {
-          const res = await axios.get(`http://127.0.0.1:8000/api/tasks?project_id=${selectedProjectId}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tasks?project_id=${selectedProjectId}`);
           setTasks(res.data);
         } catch (err) {
           console.error("Error loading task data for reports:", err);
@@ -164,7 +164,7 @@ export default function SprintReports() {
       {/* Page Header */}
       <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
         <h2 className="text-2xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-          📊 Sprint Analytics & Reports
+          ðŸ“Š Sprint Analytics & Reports
         </h2>
         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
           Visual metrics and workload size reviews for project "{activeProject?.name || 'Selected Project'}".

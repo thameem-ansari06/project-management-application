@@ -92,7 +92,7 @@ export default function GanttChart() {
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
-  // ── Derived task lists ────────────────────────────────────────────────────
+  // â”€â”€ Derived task lists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const flatTasks = useMemo(() => getFlattenedTasks(tasks), [tasks]);
   const wbsMap    = useMemo(() => buildWbsMap(tasks), [tasks]);
 
@@ -145,7 +145,7 @@ export default function GanttChart() {
     return validTasks.filter(t => matchIds.has(t.id) || ancestorIds.has(t.id));
   }, [validTasks, collapsedRows, deferredSearchQuery, wbsMap]);
 
-  // ── Date boundaries ───────────────────────────────────────────────────────
+  // â”€â”€ Date boundaries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { earliestDate, latestDate, paddedStart, totalTimelineDays, timelineDays } = useMemo(() => {
     let earliest = null;
     let latest   = null;
@@ -216,7 +216,7 @@ export default function GanttChart() {
     scrollContainerRef.current.scrollLeft = leftColWidth + todayLeftPx - halfVisible;
   }, [validTasks.length, viewMode, leftColWidth]);
 
-  // ── Zoom via Ctrl+Scroll ──────────────────────────────────────────────────
+  // â”€â”€ Zoom via Ctrl+Scroll â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -242,16 +242,16 @@ export default function GanttChart() {
     return () => el.removeEventListener('wheel', handleWheel);
   }, [viewMode]);
 
-  // ── Drag & drop ───────────────────────────────────────────────────────────
+  // â”€â”€ Drag & drop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { handlePointerDown, handlePointerMove, handlePointerUp, startXRef, deltaXRef } =
     useGanttDrag({ tasks, setTasks, dragState, setDragState, dayColWidth });
 
-  // ── Arrow paths ───────────────────────────────────────────────────────────
+  // â”€â”€ Arrow paths â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { arrowPaths, isCritical } = useArrowPaths({
     flatTasks, visibleTasks, earliestDate: paddedStart, dayColWidth,
   });
 
-  // ── Assignee picker ───────────────────────────────────────────────────────
+  // â”€â”€ Assignee picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openAssigneePicker = useCallback((e, taskId) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -274,7 +274,7 @@ export default function GanttChart() {
     const prev = tasks;
     setTasks(patchTree(tasks, taskId, { assignee: member.user, assignees: [member.user] }));
     try {
-      await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`,
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`,
         { assignee_ids: [member.user.id] });
     } catch {
       setTasks(prev);
@@ -301,7 +301,7 @@ export default function GanttChart() {
           
           try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://127.0.0.1:8000/api/tasks/${selectedTask.id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/tasks/${selectedTask.id}`, { headers: { Authorization: `Bearer ${token}` } });
           } catch (err) {
             console.error('Failed to delete task', err);
             setTasks(prevTasks);
@@ -326,7 +326,7 @@ export default function GanttChart() {
     setTasks(patchTree(tasks));
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`, { title: newName }, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`, { title: newName }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {
@@ -335,7 +335,7 @@ export default function GanttChart() {
     }
   };
 
-  // ── Scroll to today ───────────────────────────────────────────────────────
+  // â”€â”€ Scroll to today â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const scrollToToday = () => {
     if (!scrollContainerRef.current || !isTodayInRange) return;
     const half = scrollContainerRef.current.clientWidth / 2;
@@ -368,7 +368,7 @@ export default function GanttChart() {
           setSearchQuery={setSearchQuery}
         />
 
-        {/* ── Main chart container ── */}
+        {/* â”€â”€ Main chart container â”€â”€ */}
         <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm dark:shadow-xl relative ${
           isResetting ? 'transition-[--left-col-width] duration-150 ease-out' : ''
         }`}>
@@ -380,7 +380,7 @@ export default function GanttChart() {
             {/* Total width wrapper */}
             <div style={{ width: `calc(var(--left-col-width) + ${rightGridWidth}px)`, minWidth: '100%' }}>
 
-              {/* ── Sticky header row ─────────────────────────────────────── */}
+              {/* â”€â”€ Sticky header row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               <div className="flex sticky top-0 z-40 border-b border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-zinc-100/50 dark:from-zinc-900 dark:to-zinc-900/50 backdrop-blur-sm">
                 <GanttLeftPanelHeader />
                 <GanttTimelineHeader
@@ -394,7 +394,7 @@ export default function GanttChart() {
                 />
               </div>
 
-              {/* ── Body ──────────────────────────────────────────────────── */}
+              {/* â”€â”€ Body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               <div className="relative bg-white dark:bg-zinc-900">
                 <GanttGridOverlay
                   timelineDays={timelineDays}
@@ -425,7 +425,7 @@ export default function GanttChart() {
                   </div>
                 </div>
 
-                {/* Today vertical line — spans full body height */}
+                {/* Today vertical line â€” spans full body height */}
                 {isTodayInRange && (
                   <div
                     className="absolute top-0 bottom-0 z-[5] pointer-events-none"
@@ -532,7 +532,7 @@ export default function GanttChart() {
                   );
                 })}
 
-                {/* Arrow overlay — rendered ONCE over the right grid, inside body */}
+                {/* Arrow overlay â€” rendered ONCE over the right grid, inside body */}
                 <GanttArrowOverlay
                   arrowPaths={arrowPaths}
                   rightGridWidth={rightGridWidth}

@@ -155,9 +155,9 @@ export default function Dashboard() {
   const fetchWorkspaceTasks = async () => {
     if (!selectedWorkspace) return;
     try {
-      let url = `http://127.0.0.1:8000/api/tasks?workspace_id=${selectedWorkspace.id}`;
+      let url = `${import.meta.env.VITE_API_URL}/api/tasks?workspace_id=${selectedWorkspace.id}`;
       if (selectedProjectId) {
-        url = `http://127.0.0.1:8000/api/tasks?project_id=${selectedProjectId}`;
+        url = `${import.meta.env.VITE_API_URL}/api/tasks?project_id=${selectedProjectId}`;
       }
       const res = await axios.get(url);
       setWorkspaceTasks(res.data);
@@ -190,7 +190,7 @@ export default function Dashboard() {
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/projects', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/projects`, {
         workspace_id: selectedWorkspace.id,
         name: newProject.name,
         description: `Manager: ${newProject.manager}, Target End Date: ${newProject.due_date}`
@@ -210,26 +210,26 @@ export default function Dashboard() {
   // Helper to auto-create Default Folder/List under selected Project to enable immediate task seeding
   const resolveListIdForProject = async (projectId) => {
     try {
-      const foldersRes = await axios.get(`http://127.0.0.1:8000/api/folders?project_id=${projectId}`);
+      const foldersRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/folders?project_id=${projectId}`);
       let listId = null;
       if (foldersRes.data.length > 0) {
         const firstFolder = foldersRes.data[0];
-        const listsRes = await axios.get(`http://127.0.0.1:8000/api/lists?folder_id=${firstFolder.id}`);
+        const listsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/lists?folder_id=${firstFolder.id}`);
         if (listsRes.data.length > 0) {
           listId = listsRes.data[0].id;
         } else {
-          const listCreateRes = await axios.post(`http://127.0.0.1:8000/api/lists`, {
+          const listCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/lists`, {
             folder_id: firstFolder.id,
             name: 'Default List'
           });
           listId = listCreateRes.data.id;
         }
       } else {
-        const folderCreateRes = await axios.post(`http://127.0.0.1:8000/api/folders`, {
+        const folderCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/folders`, {
           project_id: Number(projectId),
           name: 'Default Folder'
         });
-        const listCreateRes = await axios.post(`http://127.0.0.1:8000/api/lists`, {
+        const listCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/lists`, {
           folder_id: folderCreateRes.data.id,
           name: 'Default List'
         });
@@ -271,7 +271,7 @@ export default function Dashboard() {
         due_date: dueStr
       };
       
-      await axios.post('http://127.0.0.1:8000/api/tasks', payload);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/tasks`, payload);
       alert('Task created successfully!');
       setNewDashboardTask({ title: '', duration: '', predecessor_id: '', parent_id: '', list_id: '', project_id: '' });
       fetchWorkspaceTasks();
@@ -288,7 +288,7 @@ export default function Dashboard() {
   // Status Change Handler inside Task Table
   const handleStatusChangeLocal = async (taskId, newStatus) => {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`, { status: newStatus });
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`, { status: newStatus });
       fetchDashboardStats(selectedWorkspace.id);
       fetchWorkspaceTasks();
       if (selectedList) {

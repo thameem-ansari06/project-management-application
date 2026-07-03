@@ -32,13 +32,13 @@ const StickyNoteNode = ({ id, data }) => {
       <div className="flex flex-col gap-2.5 h-full">
         {/* Note Header */}
         <div className="flex justify-between items-center text-[10px] text-zinc-500 dark:text-zinc-400 font-extrabold uppercase tracking-wider border-b border-zinc-100 dark:border-zinc-800 pb-1.5 select-none">
-          <span className="flex items-center gap-1">🧠 Sticky Idea</span>
+          <span className="flex items-center gap-1">ðŸ§  Sticky Idea</span>
           <button 
             onClick={() => data.onDelete(id)} 
             className="text-zinc-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-500 font-extrabold px-1 transition text-xs"
             title="Delete Idea"
           >
-            ✕
+            âœ•
           </button>
         </div>
         
@@ -116,7 +116,7 @@ export default function WhiteboardCanvas() {
       const fetchProject = async () => {
         setLoading(true);
         try {
-          const res = await axios.get(`http://127.0.0.1:8000/api/projects/${selectedProjectId}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/projects/${selectedProjectId}`);
           const canvas = res.data.canvas_state;
           if (canvas && canvas.nodes) {
             // Re-bind change and delete callback functions to the stateful nodes
@@ -166,7 +166,7 @@ export default function WhiteboardCanvas() {
         },
       };
       
-      await axios.put(`http://127.0.0.1:8000/api/projects/${selectedProjectId}`, payload);
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/projects/${selectedProjectId}`, payload);
       alert('Canvas saved successfully!');
     } catch (err) {
       console.error("Error saving canvas:", err);
@@ -243,7 +243,7 @@ export default function WhiteboardCanvas() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4 flex-shrink-0">
         <div>
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-            🎨 Whiteboard Canvas
+            ðŸŽ¨ Whiteboard Canvas
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
             Brainstorm and link ideas for project "{activeProject?.name || 'Selected Project'}".
@@ -300,9 +300,9 @@ export default function WhiteboardCanvas() {
           <span className="font-extrabold text-zinc-900 dark:text-zinc-200 block uppercase tracking-wider mb-1 flex items-center gap-1">
             <HelpCircle className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" /> Quick tips
           </span>
-          <p>• Panning: Click and drag the grid background.</p>
-          <p>• Zooming: Use mouse wheel or panel controls.</p>
-          <p>• Connections: Drag line from node bottom to top.</p>
+          <p>â€¢ Panning: Click and drag the grid background.</p>
+          <p>â€¢ Zooming: Use mouse wheel or panel controls.</p>
+          <p>â€¢ Connections: Drag line from node bottom to top.</p>
         </div>
       </div>
     </div>

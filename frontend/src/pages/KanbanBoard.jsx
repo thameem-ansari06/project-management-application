@@ -50,7 +50,7 @@ export default function KanbanBoard() {
     if (!selectedProjectId) return;
     setLoading(true);
     try {
-      const url = `http://127.0.0.1:8000/api/tasks?project_id=${selectedProjectId}`;
+      const url = `${import.meta.env.VITE_API_URL}/api/tasks?project_id=${selectedProjectId}`;
       const res = await axios.get(url);
       const fetchedTasks = res.data;
       setTasks(fetchedTasks);
@@ -134,7 +134,7 @@ export default function KanbanBoard() {
 
     // Fire API call to update status in PostgreSQL
     try {
-      await axios.put(`http://127.0.0.1:8000/api/tasks/${movedTask.id}`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${movedTask.id}`, {
         status: destColId, // Payload strictly matches "To Do", "In Progress", or "Done"
       });
     } catch (err) {
@@ -276,7 +276,7 @@ export default function KanbanBoard() {
                                         variant="outline"
                                         className="text-[9px] bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 font-bold"
                                       >
-                                        📁 {getProjectName(t)}
+                                        ðŸ“ {getProjectName(t)}
                                       </Badge>
 
                                       {/* Duration display */}

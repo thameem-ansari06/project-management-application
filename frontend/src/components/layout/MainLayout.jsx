@@ -249,7 +249,7 @@ export default function MainLayout() {
     if (inviteToken && token) {
       const acceptInvitation = async () => {
         try {
-          const res = await axios.post(`http://127.0.0.1:8000/api/workspaces/accept-invite?token=${inviteToken}`);
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/workspaces/accept-invite?token=${inviteToken}`);
           alert(res.data.message || 'Successfully accepted invitation!');
           fetchWorkspaces();
           if (selectedWorkspace) {
@@ -342,7 +342,7 @@ export default function MainLayout() {
       fetchChatMessages(selectedChannel.id);
       if (wsRef.current) wsRef.current.close();
       
-      const wsUrl = `ws://127.0.0.1:8000/api/chat/ws/${selectedChannel.id}`;
+      const wsUrl = `${import.meta.env.VITE_API_URL.replace(/^http/, 'ws')}/api/chat/ws/${selectedChannel.id}`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
       
@@ -359,7 +359,7 @@ export default function MainLayout() {
   // --- DATA FETCHING SERVICES ---
   const fetchCurrentUser = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/auth/me');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
       setCurrentUser(res.data);
     } catch (err) { handleLogout(); }
   };
@@ -369,14 +369,14 @@ export default function MainLayout() {
     setAuthError('');
     try {
       if (authView === 'login') {
-        const res = await axios.post('http://127.0.0.1:8000/api/auth/login', { email: authForm.email, password: authForm.password });
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email: authForm.email, password: authForm.password });
         const tokenVal = res.data.access_token;
         localStorage.setItem('token', tokenVal);
         axios.defaults.headers.common['Authorization'] = `Bearer ${tokenVal}`;
         setToken(tokenVal);
       } else {
         const inviteToken = searchParams.get('token');
-        let registerUrl = 'http://127.0.0.1:8000/api/auth/register';
+        let registerUrl = `${import.meta.env.VITE_API_URL}/api/auth/register`;
         if (inviteToken) {
           registerUrl += `?token=${inviteToken}`;
         }
@@ -403,7 +403,7 @@ export default function MainLayout() {
 
   const fetchWorkspaces = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/workspace');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/workspace`);
       setWorkspaces(res.data);
       if (res.data.length > 0) {
         const savedId = localStorage.getItem('selectedWorkspaceId');
@@ -421,7 +421,7 @@ export default function MainLayout() {
 
   const fetchWorkspaceMembers = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/workspaces/${wid}/members`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/workspaces/${wid}/members`);
       setWorkspaceMembers(res.data);
     } catch (err) { console.error(err); }
   };
@@ -430,7 +430,7 @@ export default function MainLayout() {
     const workspaceId = wid || selectedWorkspace?.id;
     if (!workspaceId) return;
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/projects?workspace_id=${workspaceId}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/projects?workspace_id=${workspaceId}`);
       setSpaces(res.data);
       
       const savedProjectId = localStorage.getItem('selectedProjectId');
@@ -444,26 +444,26 @@ export default function MainLayout() {
   const resolveListIdForProject = async (projectId) => {
     if (!projectId) return null;
     try {
-      const foldersRes = await axios.get(`http://127.0.0.1:8000/api/folders?project_id=${projectId}`);
+      const foldersRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/folders?project_id=${projectId}`);
       let listId = null;
       if (foldersRes.data.length > 0) {
         const firstFolder = foldersRes.data[0];
-        const listsRes = await axios.get(`http://127.0.0.1:8000/api/lists?folder_id=${firstFolder.id}`);
+        const listsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/lists?folder_id=${firstFolder.id}`);
         if (listsRes.data.length > 0) {
           listId = listsRes.data[0].id;
         } else {
-          const listCreateRes = await axios.post(`http://127.0.0.1:8000/api/lists`, {
+          const listCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/lists`, {
             folder_id: firstFolder.id,
             name: 'Default List'
           });
           listId = listCreateRes.data.id;
         }
       } else {
-        const folderCreateRes = await axios.post(`http://127.0.0.1:8000/api/folders`, {
+        const folderCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/folders`, {
           project_id: Number(projectId),
           name: 'Default Folder'
         });
-        const listCreateRes = await axios.post(`http://127.0.0.1:8000/api/lists`, {
+        const listCreateRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/lists`, {
           folder_id: folderCreateRes.data.id,
           name: 'Default List'
         });
@@ -478,21 +478,21 @@ export default function MainLayout() {
 
   const fetchFolders = async (sid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/folders?project_id=${sid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/folders?project_id=${sid}`);
       setFolders(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchLists = async (fid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/lists?folder_id=${fid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/lists?folder_id=${fid}`);
       setLists(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchTasks = async (lid) => {
     try {
-      let url = 'http://127.0.0.1:8000/api/tasks';
+      let url = `${import.meta.env.VITE_API_URL}/api/tasks`;
       const targetLid = lid && (typeof lid === 'number' || typeof lid === 'string') ? lid : null;
       if (targetLid) {
         url += `?list_id=${targetLid}`;
@@ -515,28 +515,28 @@ export default function MainLayout() {
 
   const fetchDashboardStats = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/dashboard/overview?workspace_id=${wid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/dashboard/overview?workspace_id=${wid}`);
       setStats(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/notifications');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications`);
       setNotifications(res.data);
     } catch (err) { console.error(err); }
   };
 
   const markNotificationRead = async (nid) => {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/notifications/${nid}/read`);
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/${nid}/read`);
       fetchNotifications();
     } catch (err) { console.error(err); }
   };
 
   const fetchDocuments = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/documents?workspace_id=${wid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents?workspace_id=${wid}`);
       setDocuments(res.data);
       if (res.data.length > 0 && !selectedDoc) setSelectedDoc(res.data[0]);
     } catch (err) { console.error(err); }
@@ -544,7 +544,7 @@ export default function MainLayout() {
 
   const fetchChatChannels = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/chat/channels?workspace_id=${wid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat/channels?workspace_id=${wid}`);
       setChatChannels(res.data);
       if (res.data.length > 0 && !selectedChannel) setSelectedChannel(res.data[0]);
     } catch (err) { console.error(err); }
@@ -552,14 +552,14 @@ export default function MainLayout() {
 
   const fetchChatMessages = async (cid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/chat/messages?channel_id=${cid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat/messages?channel_id=${cid}`);
       setChatMessages(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchForms = async (lid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/forms?list_id=${lid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/forms?list_id=${lid}`);
       setForms(res.data);
       if (res.data.length > 0) setSelectedForm(res.data[0]);
     } catch (err) { console.error(err); }
@@ -567,22 +567,22 @@ export default function MainLayout() {
 
   const fetchAutomationRules = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/automation/rules?workspace_id=${wid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/automation/rules?workspace_id=${wid}`);
       setAutomationRules(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchGoals = async (wid) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/goals?workspace_id=${wid}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/goals?workspace_id=${wid}`);
       setGoals(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchReports = async (wid) => {
     try {
-      const burn = await axios.get(`http://127.0.0.1:8000/api/reports/burndown?workspace_id=${wid}`);
-      const vel = await axios.get(`http://127.0.0.1:8000/api/reports/velocity?workspace_id=${wid}`);
+      const burn = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/burndown?workspace_id=${wid}`);
+      const vel = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/velocity?workspace_id=${wid}`);
       setBurndownReport(burn.data);
       setVelocityReport(vel.data);
     } catch (err) { console.error(err); }
@@ -590,14 +590,14 @@ export default function MainLayout() {
 
   const fetchComments = async (taskId) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/comments?task_id=${taskId}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/comments?task_id=${taskId}`);
       setTaskComments(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchAttachments = async (taskId) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/attachments?task_id=${taskId}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/attachments?task_id=${taskId}`);
       setTaskAttachments(res.data);
     } catch (err) { console.error(err); }
   };
@@ -605,7 +605,7 @@ export default function MainLayout() {
   // --- DELETION HANDLERS ---
   const handleDeleteWorkspace = async (workspaceId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/workspace/${workspaceId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/workspace/${workspaceId}`);
       const updatedWorkspaces = workspaces.filter(w => w.id !== workspaceId);
       setWorkspaces(updatedWorkspaces);
       if (selectedWorkspace?.id === workspaceId) {
@@ -620,7 +620,7 @@ export default function MainLayout() {
 
   const handleDeleteProject = async (projectId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/projects/${projectId}`);
       setSpaces(spaces.filter(s => s.id !== projectId));
       if (selectedProjectId === projectId) {
         localStorage.removeItem('selectedProjectId');
@@ -632,7 +632,7 @@ export default function MainLayout() {
 
   const handleDeleteFolder = async (folderId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/folders/${folderId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/folders/${folderId}`);
       setFolders(folders.filter(f => f.id !== folderId));
       if (selectedFolder?.id === folderId) {
         setSelectedFolder(null);
@@ -643,7 +643,7 @@ export default function MainLayout() {
 
   const handleDeleteList = async (listId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/lists/${listId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/lists/${listId}`);
       setLists(lists.filter(l => l.id !== listId));
       if (selectedList?.id === listId) {
         setSelectedList(null);
@@ -653,7 +653,7 @@ export default function MainLayout() {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/tasks/${taskId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`);
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       
@@ -666,7 +666,7 @@ export default function MainLayout() {
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/workspace', { name: newWorkspaceName });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/workspace`, { name: newWorkspaceName });
       setWorkspaces([...workspaces, res.data]);
       setSelectedWorkspace(res.data);
       setNewWorkspaceName('');
@@ -677,7 +677,7 @@ export default function MainLayout() {
   const handleCreateSpace = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/projects', { workspace_id: selectedWorkspace.id, name: newSpaceName });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/projects`, { workspace_id: selectedWorkspace.id, name: newSpaceName });
       setSpaces([...spaces, res.data]);
       setNewSpaceName('');
       setShowSpaceModal(false);
@@ -691,7 +691,7 @@ export default function MainLayout() {
   const handleCreateFolder = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/folders', { project_id: selectedSpace.id, name: newFolderName });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/folders`, { project_id: selectedSpace.id, name: newFolderName });
       setFolders([...folders, res.data]);
       setNewFolderName('');
       setShowFolderModal(false);
@@ -701,7 +701,7 @@ export default function MainLayout() {
   const handleCreateList = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/lists', { folder_id: selectedFolder.id, name: newListName });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/lists`, { folder_id: selectedFolder.id, name: newListName });
       setLists([...lists, res.data]);
       setNewListName('');
       setShowListModal(false);
@@ -743,7 +743,7 @@ export default function MainLayout() {
         actual_hours: taskData.actual_hours || 0.0,
         remaining_hours: taskData.remaining_hours || 0.0
       };
-      const res = await axios.post('http://127.0.0.1:8000/api/tasks', payload);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/tasks`, payload);
       if (selectedList) {
         fetchTasks(selectedList.id);
       } else {
@@ -757,7 +757,7 @@ export default function MainLayout() {
   // --- TIME TRACKING ENGINE ---
   const handleStartTimer = async (taskId) => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/time-tracking/start', { task_id: taskId });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/time-tracking/start`, { task_id: taskId });
       setActiveTimer(res.data);
       setTimerSeconds(0);
     } catch (err) { console.error(err); }
@@ -766,7 +766,7 @@ export default function MainLayout() {
   const handleStopTimer = async () => {
     if (!activeTimer) return;
     try {
-      await axios.post(`http://127.0.0.1:8000/api/time-tracking/stop/${activeTimer.id}`);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/time-tracking/stop/${activeTimer.id}`);
       setActiveTimer(null);
       setTimerSeconds(0);
       alert('Time Entry Logged!');
@@ -777,7 +777,7 @@ export default function MainLayout() {
   const handleCreateGoal = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/goals', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/goals`, {
         workspace_id: selectedWorkspace.id,
         title: newGoal.title,
         target_value: Number(newGoal.target_value),
@@ -792,7 +792,7 @@ export default function MainLayout() {
   const handleCreateAutomationRule = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/automation/rules', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/automation/rules`, {
         workspace_id: selectedWorkspace.id,
         trigger_type: newRule.trigger_type,
         condition_value: newRule.condition_value,
@@ -807,7 +807,7 @@ export default function MainLayout() {
   // --- DOCS WRITER ---
   const handleCreateDoc = async () => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/documents', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/documents`, {
         workspace_id: selectedWorkspace.id,
         title: 'Untitled Document',
         content: ''
@@ -820,7 +820,7 @@ export default function MainLayout() {
   const handleSaveDocContent = async (title, content) => {
     if (!selectedDoc) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/documents/${selectedDoc.id}`, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/documents/${selectedDoc.id}`, {
         workspace_id: selectedWorkspace.id,
         title: title,
         content: content
@@ -832,7 +832,7 @@ export default function MainLayout() {
 
   const handleDeleteDoc = async (docId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/documents/${docId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/documents/${docId}`);
       const updatedDocs = documents.filter(d => d.id !== docId);
       setDocuments(updatedDocs);
       if (selectedDoc?.id === docId) {
@@ -849,7 +849,7 @@ export default function MainLayout() {
     e.preventDefault();
     if (!newMessage || !selectedChannel) return;
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/chat/messages', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat/messages`, {
         channel_id: selectedChannel.id,
         message: newMessage
       });
@@ -865,7 +865,7 @@ export default function MainLayout() {
   const handleCreateChannel = async (name) => {
     if (!name) return;
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/chat/channels', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat/channels`, {
         workspace_id: selectedWorkspace.id,
         name: name
       });
@@ -878,7 +878,7 @@ export default function MainLayout() {
   const handleCreateForm = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/forms', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/forms`, {
         list_id: selectedList.id,
         title: newFormTitle
       });
@@ -893,7 +893,7 @@ export default function MainLayout() {
     e.preventDefault();
     if (!selectedForm) return;
     try {
-      await axios.post(`http://127.0.0.1:8000/api/forms/submit/${selectedForm.id}`, formSubmissionData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/forms/submit/${selectedForm.id}`, formSubmissionData);
       alert('Form Submitted successfully. Task created!');
       setFormSubmissionData({ title: '', description: '', priority: 'Medium' });
       if (selectedList) fetchTasks(selectedList.id);
@@ -907,7 +907,7 @@ export default function MainLayout() {
     setAiLoading(true);
     setAiResponse('');
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/ai/chat', { prompt: aiPrompt });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/ai/chat`, { prompt: aiPrompt });
       setAiResponse(res.data.response);
     } catch (err) {
       setAiResponse('AI service failed to connect.');
@@ -925,7 +925,7 @@ export default function MainLayout() {
     const taskId = e.dataTransfer.getData('taskId');
     if (!taskId) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`, {
         status: targetStatus
       });
       setTasks(tasks.map(t => t.id === Number(taskId) ? res.data : t));
@@ -938,7 +938,7 @@ export default function MainLayout() {
   // --- INLINE UPDATERS ---
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`, { status: newStatus });
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`, { status: newStatus });
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       if (selectedTask && selectedTask.id === taskId) setSelectedTask(res.data);
@@ -948,7 +948,7 @@ export default function MainLayout() {
 
   const handlePriorityChange = async (taskId, newPriority) => {
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${taskId}`, { priority: newPriority });
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${taskId}`, { priority: newPriority });
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       if (selectedTask && selectedTask.id === taskId) setSelectedTask(res.data);
@@ -959,7 +959,7 @@ export default function MainLayout() {
   const handleUpdateTaskDescription = async (desc) => {
     if (!selectedTask) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${selectedTask.id}`, { description: desc });
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${selectedTask.id}`, { description: desc });
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       setSelectedTask(res.data);
@@ -972,7 +972,7 @@ export default function MainLayout() {
       const payload = {};
       if (startVal !== undefined) payload.start_date = startVal || null;
       if (dueVal !== undefined) payload.due_date = dueVal || null;
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${selectedTask.id}`, payload);
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${selectedTask.id}`, payload);
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       setSelectedTask(res.data);
@@ -985,7 +985,7 @@ export default function MainLayout() {
     if (isChecked) currentIds.push(userId);
     else currentIds = currentIds.filter(id => id !== userId);
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${selectedTask.id}`, { assignee_ids: currentIds });
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${selectedTask.id}`, { assignee_ids: currentIds });
       if (selectedList) fetchTasks(selectedList.id);
       else if (selectedProjectId) fetchTasks();
       setSelectedTask(res.data);
@@ -996,7 +996,7 @@ export default function MainLayout() {
     e.preventDefault();
     if (!subtaskTitle || !selectedTask) return;
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/tasks', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/tasks`, {
         list_id: selectedTask.list_id,
         title: subtaskTitle,
         parent_task_id: selectedTask.id
@@ -1012,7 +1012,7 @@ export default function MainLayout() {
     e.preventDefault();
     if (!newComment || !selectedTask) return;
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/comments', { task_id: selectedTask.id, message: newComment });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/comments`, { task_id: selectedTask.id, message: newComment });
       setTaskComments([...taskComments, res.data]);
       setNewComment('');
     } catch (err) { console.error(err); }
@@ -1024,7 +1024,7 @@ export default function MainLayout() {
     const formData = new FormData();
     formData.append('file', attachmentFile);
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/attachments?task_id=${selectedTask.id}`, formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/attachments?task_id=${selectedTask.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setTaskAttachments([...taskAttachments, res.data]);
@@ -1136,7 +1136,7 @@ export default function MainLayout() {
                 </div>
               )}
 
-              {/* Google OAuth button — always shown, prominent on invite flow */}
+              {/* Google OAuth button â€” always shown, prominent on invite flow */}
               <button
                 id="google-oauth-btn"
                 type="button"
@@ -1161,7 +1161,7 @@ export default function MainLayout() {
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
 
-              {/* Traditional email/password form — hidden if invite token present, shown on toggle */}
+              {/* Traditional email/password form â€” hidden if invite token present, shown on toggle */}
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                 {authView === 'register' && (
                   <div>
@@ -1194,7 +1194,7 @@ export default function MainLayout() {
                       required
                       value={authForm.password}
                       onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
                   </div>
                 )}
@@ -1205,9 +1205,9 @@ export default function MainLayout() {
                       type="password"
                       value={authForm.password}
                       onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
-                    <p className="text-xs text-zinc-500 mt-1">💡 We recommend using "Continue with Google" above to get started faster.</p>
+                    <p className="text-xs text-zinc-500 mt-1">ðŸ’¡ We recommend using "Continue with Google" above to get started faster.</p>
                   </div>
                 )}
                 <Button type="submit" className="w-full font-bold">
@@ -1290,7 +1290,7 @@ export default function MainLayout() {
                     onClick={() => setSelectedWorkspace(w)} 
                     className={`font-semibold cursor-pointer text-xs flex justify-between items-center ${selectedWorkspace?.id === w.id ? 'bg-zinc-200 dark:bg-zinc-800 font-bold' : ''}`}
                   >
-                    <span>🏢 {w.name}</span>
+                    <span>ðŸ¢ {w.name}</span>
                     {['admin', 'owner'].includes(currentUserRole) && (
                       <Trash2 
                         className="w-3.5 h-3.5 text-red-500 hover:text-red-700 ml-2" 
@@ -1633,7 +1633,7 @@ export default function MainLayout() {
                             className={`group flex items-center justify-between px-2.5 py-1.5 rounded-md cursor-pointer transition ${selectedSpace?.id === space.id ? 'bg-zinc-900/5 dark:bg-white/10 backdrop-blur-md border border-zinc-900/10 dark:border-white/20 shadow-sm text-zinc-900 dark:text-white font-bold' : 'text-zinc-500 dark:text-zinc-450 hover:bg-transparent hover:text-zinc-800 dark:hover:text-white'}`}
                           >
                             <div className="flex items-center gap-2 overflow-hidden">
-                              <span className="shrink-0 text-zinc-400">📁</span>
+                              <span className="shrink-0 text-zinc-400">ðŸ“</span>
                               <span className="truncate text-[13px] font-medium tracking-tight">{space.name}</span>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1658,7 +1658,7 @@ export default function MainLayout() {
                                     className={`group flex items-center justify-between px-2 py-1 rounded-md cursor-pointer transition ${selectedFolder?.id === folder.id ? 'bg-zinc-900/5 dark:bg-white/10 backdrop-blur-md border border-zinc-900/10 dark:border-white/20 shadow-sm text-zinc-900 dark:text-white font-semibold' : 'text-zinc-500 dark:text-zinc-450 hover:bg-transparent hover:text-zinc-800 dark:hover:text-white'}`}
                                   >
                                     <div className="flex items-center gap-1.5 overflow-hidden">
-                                      <span className="shrink-0 text-zinc-400 dark:text-zinc-550">📂</span>
+                                      <span className="shrink-0 text-zinc-400 dark:text-zinc-550">ðŸ“‚</span>
                                       <span className="truncate text-[13px] font-medium tracking-tight">{folder.name}</span>
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1861,8 +1861,8 @@ export default function MainLayout() {
       {showAIConsole && (
         <div className="fixed top-16 right-8 w-96 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-50 flex flex-col max-h-[80vh] text-zinc-100">
           <div className="p-4 border-b border-zinc-800 flex justify-between items-center">
-            <span className="font-extrabold text-xs uppercase tracking-wider text-purple-400">✨ AI Assistant Advisor</span>
-            <button onClick={() => setShowAIConsole(false)} className="text-zinc-400 hover:text-white font-bold">✕</button>
+            <span className="font-extrabold text-xs uppercase tracking-wider text-purple-400">âœ¨ AI Assistant Advisor</span>
+            <button onClick={() => setShowAIConsole(false)} className="text-zinc-400 hover:text-white font-bold">âœ•</button>
           </div>
           <div className="p-4 overflow-y-auto flex-1 text-xs space-y-4">
             {aiResponse ? (
@@ -2058,7 +2058,7 @@ export default function MainLayout() {
                 >
                   <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                 </Button>
-                <Button onClick={() => { setSelectedTask(null); if (selectedList) fetchTasks(selectedList.id); }} variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-white">✕</Button>
+                <Button onClick={() => { setSelectedTask(null); if (selectedList) fetchTasks(selectedList.id); }} variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-white">âœ•</Button>
               </div>
             </div>
 
@@ -2127,7 +2127,7 @@ export default function MainLayout() {
                     onChange={async (e) => {
                       const val = e.target.value ? Number(e.target.value) : null;
                       try {
-                        const res = await axios.put(`http://127.0.0.1:8000/api/tasks/${selectedTask.id}`, {
+                        const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/tasks/${selectedTask.id}`, {
                           assigned_to_id: val
                         });
                         setSelectedTask(res.data);
@@ -2170,7 +2170,7 @@ export default function MainLayout() {
                   <div className="space-y-1.5 max-h-20 overflow-y-auto">
                     {taskAttachments.map(att => (
                       <a key={att.id} href={att.file_url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 p-1.5 bg-zinc-900 border border-zinc-800 rounded hover:border-zinc-700 text-blue-400 font-semibold truncate block">
-                        📎 <span className="truncate flex-1">{att.file_name}</span>
+                        ðŸ“Ž <span className="truncate flex-1">{att.file_name}</span>
                       </a>
                     ))}
                   </div>

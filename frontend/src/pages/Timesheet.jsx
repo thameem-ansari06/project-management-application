@@ -19,7 +19,7 @@ export default function Timesheet() {
 
   const fetchEntries = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/time-tracking/user');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/time-tracking/user`);
       setEntries(res.data);
     } catch (err) {
       console.error("Failed to fetch timesheet entries:", err);

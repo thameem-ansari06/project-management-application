@@ -101,7 +101,7 @@ export default function TaskEngineList() {
             status: task.status || 'To Do'
           };
           try {
-            await axios.post('http://127.0.0.1:8000/api/tasks', payload);
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/tasks`, payload);
           } catch (err) {
             console.error("Failed to import task", task.title, err);
           }
@@ -219,7 +219,7 @@ export default function TaskEngineList() {
                       <td className="py-4 px-4 text-zinc-600 dark:text-zinc-400 text-xs font-semibold">{task.end_date || <span className="text-zinc-400 dark:text-zinc-500">No date</span>}</td>
                       <td className="py-4 px-4 text-xs">
                         <Button onClick={() => handleStartTimer(task.id)} variant="outline" size="sm" className="h-7 text-[10px] font-bold border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                          ⏱️ Start
+                          â±ï¸ Start
                         </Button>
                       </td>
                       <td className="py-4 px-6 flex justify-end">
@@ -245,7 +245,7 @@ export default function TaskEngineList() {
                       <tr key={sub.id} className="bg-zinc-50/50 dark:bg-zinc-900/10 border-l-2 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-900/30 transition text-zinc-500 dark:text-zinc-400">
                         <td className="py-2.5 px-6 pl-12">
                           <div className="flex items-center gap-2">
-                            <span className="text-zinc-400 dark:text-zinc-600 text-xs mr-1">└─</span>
+                            <span className="text-zinc-400 dark:text-zinc-600 text-xs mr-1">â””â”€</span>
                             {(sub.assignee || (sub.assignees && sub.assignees.length > 0)) && (
                               <Avatar className="w-5 h-5 text-[9px] border border-zinc-200 dark:border-zinc-850 flex-shrink-0">
                                 <AvatarFallback 
