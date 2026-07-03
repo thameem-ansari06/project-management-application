@@ -77,3 +77,4 @@ pydantic[email]==2.13.4
 #   - does NOT conflict with any other package in this requirements.txt
 #   - verified via live pip dry-run: no conflicts
 fastapi-mail==1.5.9
+python-multipart
