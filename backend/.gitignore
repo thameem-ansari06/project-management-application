@@ -1,0 +1,33 @@
+# -----------------------
+# Node / Frontend (React/Vite)
+# -----------------------
+node_modules/
+dist/
+build/
+.npm/
+
+# -----------------------
+# Python / Backend (FastAPI)
+# -----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.sqlite3
+
+# -----------------------
+# Environment Variables & Secrets
+# -----------------------
+.env
+.env.local
+.env.*.local
+secrets.json
+
+# -----------------------
+# OS & Editor Files
+# -----------------------
+.DS_Store
+.vscode/
+.idea/

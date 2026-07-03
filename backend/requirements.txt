@@ -1,0 +1,79 @@
+# ============================================================
+# PM Workspace — Backend Python Dependencies
+# ============================================================
+# Full verification completed: 2026-06-26 (live pip install tested)
+# Install: pip install -r requirements.txt
+# Python:  3.10+ (tested on 3.12.10)
+# ============================================================
+
+# --- Web Framework ---
+# FastAPI 0.115.x: proven-stable series with full Pydantic v2 support.
+# Requires starlette>=0.40.0,<0.47.0 — constrains fastapi-mail choice (see below).
+fastapi==0.115.12
+
+# --- ASGI Server ---
+# [standard] extra is MANDATORY: installs websockets (required for WebSocket /
+# WebSocketDisconnect in main.py) and httptools (HTTP/1.1 performance).
+# Without [standard], WebSocket routes fail at runtime with no clear error.
+uvicorn[standard]==0.32.1
+
+# --- Database ORM ---
+# SQLAlchemy 2.0.x — all 2.0.x patches are backward-compatible.
+# NOTE: database.py uses deprecated sqlalchemy.ext.declarative.declarative_base().
+# This prints MovedIn20Warning at startup but does not crash.
+# Will be corrected in Issue 5 (refactor phase).
+SQLAlchemy==2.0.36
+
+# --- PostgreSQL Driver ---
+# Binary wheel — no libpq-dev / PostgreSQL headers needed on the build machine.
+# Required by SQLAlchemy for the postgresql:// DATABASE_URL defined in .env.
+psycopg2-binary==2.9.10
+
+# --- Authentication & Security ---
+# PyJWT 2.x API: jwt.encode() returns str; jwt.decode() takes algorithms=[list].
+# The project uses the 2.x signature — do NOT downgrade to 1.x.
+PyJWT==2.9.0
+
+# bcrypt pinned to 4.x deliberately. bcrypt 5.0.0 bumped Minimum Supported Rust
+# Version (MSRV) to 1.74, which can break builds in CI without a Rust toolchain.
+# 4.2.1 is functionally identical to 5.x for gensalt/hashpw/checkpw usage.
+bcrypt==4.2.1
+
+# --- HTTP Client ---
+# Used for Google OAuth2 token exchange (httpx.post) and userinfo fetch (httpx.get).
+# Only synchronous httpx calls are made. httpx 0.28.1 is the current stable version.
+# The project does not use removed 0.28 APIs (proxies=, app=), so upgrade is safe.
+httpx==0.28.1
+
+# --- Configuration / Environment Variables ---
+# Loads backend/.env at startup via load_dotenv().
+# Without this, DATABASE_URL / SECRET_KEY / MAIL_* / GOOGLE_* are unset
+# and the DB engine fails immediately on startup.
+python-dotenv==1.0.1
+
+# --- Data Validation & Serialisation ---
+# [email] extra is MANDATORY — installs email-validator for EmailStr in schemas.py.
+# Without it: ImportError on startup.
+# Pydantic v2 is required: all schemas use from_attributes=True (v2 API).
+#
+# Version: 2.13.4 (latest stable 2.x)
+# fastapi-mail==1.5.9 requires pydantic>=2.12.5.
+# fastapi==0.115.12 accepts pydantic<3.0.0.
+# 2.13.4 satisfies both constraints and is fully backward-compatible.
+pydantic[email]==2.13.4
+
+# --- Email Sending ---
+# UPGRADED from original 1.4.1. Version selection rationale:
+#
+# fastapi-mail 1.4.x: imports pydantic.BaseSettings (removed in Pydantic v2).
+#   Crash: ImportError: cannot import name 'BaseSettings' from 'pydantic'
+#
+# fastapi-mail 1.6.x: requires starlette>=1.0.0
+#   Crash: conflicts with fastapi==0.115.12 which requires starlette<0.47.0
+#
+# fastapi-mail 1.5.9: the correct version —
+#   - requires starlette>=0.24,<1.0 (compatible with fastapi 0.115.x)
+#   - requires pydantic>=2.12.5 (uses pydantic-settings, fully Pydantic v2 compatible)
+#   - does NOT conflict with any other package in this requirements.txt
+#   - verified via live pip dry-run: no conflicts
+fastapi-mail==1.5.9
