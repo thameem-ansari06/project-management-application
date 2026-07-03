@@ -188,7 +188,7 @@ export default function JoinTeam() {
         {/* Direct Google OAuth button (bypasses login screen) */}
         <a
           id="google-oauth-direct-btn"
-          href={`http://127.0.0.1:8000/api/auth/google/login?invite_token=${encodeURIComponent(token)}&invite_email=${encodeURIComponent(email)}`}
+          href={`${import.meta.env.VITE_API_URL}/api/auth/google/login?invite_token=${encodeURIComponent(token)}&invite_email=${encodeURIComponent(email)}`}
           style={{
             width: '100%',
             maxWidth: '320px',

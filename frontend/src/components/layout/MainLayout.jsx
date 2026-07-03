@@ -1087,7 +1087,7 @@ export default function MainLayout() {
 
   // --- Google OAuth redirect handler ---
   const handleGoogleLogin = () => {
-    let url = 'http://127.0.0.1:8000/api/auth/google/login';
+    let url = `${import.meta.env.VITE_API_URL}/api/auth/google/login`;
     const params = new URLSearchParams();
     if (pendingInviteToken) params.set('invite_token', pendingInviteToken);
     if (pendingInviteEmail) params.set('invite_email', pendingInviteEmail);
