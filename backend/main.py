@@ -37,7 +37,7 @@ app = FastAPI(title="PM Workspace API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -630,6 +630,7 @@ def invite_workspace_member(
     db.refresh(db_invite)
     
     # Send invitation email in the background
+    invite_link = f"{FRONTEND_URL}/join-team?email={invite_create.email}&token={token}"
     html_body = f"""
     <html>
         <body style="margin: 0; padding: 0; background-color: #0a0a0a;">
@@ -647,14 +648,14 @@ def invite_workspace_member(
                         You've been invited to collaborate. Accept your invite below — you'll be guided through a quick Google sign-in to get started.
                     </p>
                     <div style="text-align: center; margin-bottom: 32px;">
-                        <a href="http://localhost:5173/join-team?email={invite_create.email}&token={token}" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #09090b; text-decoration: none; padding: 14px 32px; font-size: 15px; font-weight: 700; border-radius: 10px; letter-spacing: -0.2px;">
+                        <a href="{invite_link}" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #09090b; text-decoration: none; padding: 14px 32px; font-size: 15px; font-weight: 700; border-radius: 10px; letter-spacing: -0.2px;">
                             Accept Invite &rarr;
                         </a>
                     </div>
                     <p style="font-size: 12px; line-height: 1.6; color: #52525b; border-top: 1px solid #27272a; padding-top: 24px; margin-top: 32px; text-align: center;">
                         If the button doesn't work, copy and paste this link:<br>
-                        <a href="http://localhost:5173/join-team?email={invite_create.email}&token={token}" style="color: #818cf8; text-decoration: underline; word-break: break-all;">
-                            http://localhost:5173/join-team?email={invite_create.email}&token={token}
+                        <a href="{invite_link}" style="color: #818cf8; text-decoration: underline; word-break: break-all;">
+                            {invite_link}
                         </a>
                         <br><br>
                         This invitation expires in 7 days. If you didn't expect this, you can safely ignore it.
@@ -1136,7 +1137,13 @@ def get_comments(task_id: int, current_user: models.User = Depends(get_current_u
 
 # --- ATTACHMENTS ---
 @app.post("/api/attachments", response_model=schemas.AttachmentResponse)
-def upload_attachment(task_id: int, file: UploadFile = File(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def upload_attachment(
+    task_id: int,
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     # Verify task exists
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if not task:
@@ -1150,7 +1157,7 @@ def upload_attachment(task_id: int, file: UploadFile = File(...), current_user: 
     with open(file_path, "wb") as buffer:
         buffer.write(file.file.read())
         
-    file_url = f"http://127.0.0.1:8000/uploads/{unique_filename}"
+    file_url = f"{request.base_url}uploads/{unique_filename}"
     
     db_attachment = models.Attachment(
         task_id=task_id,
@@ -1310,6 +1317,7 @@ def create_document(doc: schemas.DocumentCreate, current_user: models.User = Dep
 @app.post("/api/documents/upload", response_model=schemas.DocumentResponse)
 def upload_document(
     workspace_id: int,
+    request: Request,
     file: UploadFile = File(...),
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -1324,7 +1332,7 @@ def upload_document(
     with open(file_path, "wb") as buffer:
         buffer.write(file_content)
         
-    file_url = f"http://127.0.0.1:8000/uploads/{unique_filename}"
+    file_url = f"{request.base_url}uploads/{unique_filename}"
     
     db_doc = models.Document(
         workspace_id=workspace_id,
