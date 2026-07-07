@@ -143,14 +143,31 @@ export default function MainLayout() {
   // --- Handle Google OAuth token returned in URL (after /api/auth/google/callback redirect) ---
   useEffect(() => {
     const googleToken = searchParams.get('google_token');
-    if (googleToken && !token) {
+    if (!googleToken) return;
+
+    const completeGoogleLogin = async () => {
       localStorage.setItem('token', googleToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${googleToken}`;
       setToken(googleToken);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [searchParams]);
+      setAuthError('');
+
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
+        setCurrentUser(res.data);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+        navigate('/dashboard', { replace: true });
+      } catch (err) {
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['Authorization'];
+        setToken('');
+        setCurrentUser(null);
+        setAuthError(err.response?.data?.detail || 'Google sign-in failed. Please try again.');
+      }
+    };
+
+    completeGoogleLogin();
+  }, [searchParams, navigate]);
 
   // --- HIERARCHY STATE ---
   const [workspaces, setWorkspaces] = useState([]);
