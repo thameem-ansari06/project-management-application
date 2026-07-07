@@ -18,7 +18,12 @@ SQLALCHEMY_DATABASE_URL = os.environ.get(
 )
 
 # THIS is the engine variable that main.py is looking for!
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+#engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,  # Ithu thaan magic fix! Connection dead-a iruntha pudhusa create pannidum.
+    pool_recycle=1800    # (Optional) 30 minutes-kku oru thadava connection-a recycle pannidum.
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
