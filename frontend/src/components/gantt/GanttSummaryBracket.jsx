@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { parseDate, getDiffDays } from '../../lib/dateUtils';
-import { ROW_H, getCompletion } from './ganttUtils';
+import { normalizeTaskDependencies } from '../../lib/taskDependencyUtils';
+import { getCompletion } from './ganttUtils';
 
 function GanttSummaryBracket({
   task,
@@ -13,10 +14,11 @@ function GanttSummaryBracket({
   handlePointerDown,
   handlePointerMove,
   handlePointerUp,
-  startXRef,
   deltaXRef,
+  setSelectedTask,
 }) {
   const bracketRef = useRef(null);
+  const suppressDetailsUntilRef = useRef(0);
 
   // Compute bracket span from children
   const children = [...(task.children || []), ...(task.subtasks || [])];
@@ -25,7 +27,8 @@ function GanttSummaryBracket({
 
   children.forEach(child => {
     const cs = parseDate(child.start_date);
-    const ce = child.end_date ? parseDate(child.end_date) : cs ? new Date(cs) : null;
+    const childFinish = child.end_date || child.due_date;
+    const ce = childFinish ? parseDate(childFinish) : cs ? new Date(cs) : null;
     if (cs && cs < bracketStart) bracketStart = cs;
     if (ce && ce > bracketEnd)   bracketEnd   = ce;
   });
@@ -37,17 +40,34 @@ function GanttSummaryBracket({
 
   const completion = getCompletion(task);
   const isPrimary  = dragState?.taskId === task.id;
-  const canDrag    = !task.predecessor_id;
+  const canDrag    = normalizeTaskDependencies(task).length === 0;
 
   const localPointerMove = (e) => {
+    e.stopPropagation();
     handlePointerMove(e);
     if (bracketRef.current && isPrimary && dragState?.mode === 'move') {
-      bracketRef.current.style.transform = `translateX(${deltaXRef.current}px)`;
+      const snappedDeltaX = Math.round(deltaXRef.current / dayColWidth) * dayColWidth;
+      bracketRef.current.style.transform = 'translate3d(0, -50%, 0)';
+      bracketRef.current.style.left = `${leftPx + snappedDeltaX}px`;
+      bracketRef.current.style.width = `${widthPx}px`;
     }
   };
   const localPointerUp = (e) => {
-    if (bracketRef.current) bracketRef.current.style.transform = 'none';
+    e.stopPropagation();
+    if (Math.abs(deltaXRef.current) > 3) suppressDetailsUntilRef.current = Date.now() + 500;
+    if (bracketRef.current) {
+      const snappedDeltaX = Math.round(deltaXRef.current / dayColWidth) * dayColWidth;
+      bracketRef.current.style.transform = 'translate3d(0, -50%, 0)';
+      bracketRef.current.style.left = `${leftPx + snappedDeltaX}px`;
+      bracketRef.current.style.width = `${widthPx}px`;
+    }
     handlePointerUp(e, task);
+  };
+
+  const openTaskDetails = (event) => {
+    event.stopPropagation();
+    if (Date.now() < suppressDetailsUntilRef.current) return;
+    setSelectedTask?.(task);
   };
 
   const color = isTaskCritical ? '#ef4444' : '#71717a';
@@ -58,6 +78,15 @@ function GanttSummaryBracket({
       onPointerDown={canDrag ? (e) => handlePointerDown(e, task) : undefined}
       onPointerMove={canDrag ? localPointerMove : undefined}
       onPointerUp={canDrag ? localPointerUp : undefined}
+      onDoubleClick={openTaskDetails}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openTaskDetails(event);
+        }
+      }}
+      tabIndex={0}
+      aria-label={`${task.title}, summary task`}
       className={`absolute z-10 ${canDrag ? 'cursor-grab' : ''}`}
       style={{
         left: `${leftPx}px`,
@@ -111,6 +140,8 @@ export default React.memo(GanttSummaryBracket, (prev, next) => {
   if (prev.task.id !== next.task.id) return false;
   if (prev.task.status !== next.task.status) return false;
   if (prev.task.progress !== next.task.progress) return false;
+  if (prev.task.dependencies !== next.task.dependencies) return false;
+  if (prev.task.predecessors !== next.task.predecessors) return false;
   
   if (prev.taskStart?.getTime() !== next.taskStart?.getTime()) return false;
   if (prev.taskDue?.getTime() !== next.taskDue?.getTime()) return false;
